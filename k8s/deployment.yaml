@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minha-app-clientes
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: minha-app-clientes
+  template:
+    metadata:
+      labels:
+        app: minha-app-clientes
+    spec:
+      tolerations:
+        - key: "microservice"
+          operator: "Equal"
+          value: "clientes"
+          effect: "NoSchedule"
+      containers:
+        - name: minha-app-clientes
+          image: IMAGEM_PLACEHOLDER
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              value: "clientes-db.c5syg40e8lbk.us-east-1.rds.amazonaws.com"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://$(DB_HOST):5432/clientes_db"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "postgres_admin"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "spoospoo"
