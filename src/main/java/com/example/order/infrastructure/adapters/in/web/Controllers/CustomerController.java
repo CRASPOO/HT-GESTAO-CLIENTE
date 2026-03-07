@@ -1,17 +1,19 @@
-// src/main/java/com/example/order/infrastructure/adapters/in/web/CustomerController.java
 package com.example.order.infrastructure.adapters.in.web.Controllers;
 
 import com.example.order.application.ports.in.Customer.CreateCustomerUseCase;
 import com.example.order.application.ports.in.Customer.GetAllCustomersUseCase;
 import com.example.order.application.ports.in.Customer.GetCustomerByCpfUseCase;
 import com.example.order.application.ports.in.Customer.UpdateCustomerUseCase;
+import com.example.order.application.ports.in.Customer.LoginCustomerUseCase;
 import com.example.order.domain.entities.Customer;
 import com.example.order.infrastructure.adapters.in.web.Dtos.CustomerRequestDTO;
 import com.example.order.infrastructure.adapters.in.web.Dtos.CustomerResponseDTO;
+import com.example.order.infrastructure.adapters.in.web.Dtos.LoginRequestDTO;
 import com.example.order.shared.exceptions.CustomerNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,23 +24,26 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/customer")
-@CrossOrigin(origins = "null")
+@CrossOrigin(origins = "*")
 public class CustomerController {
 
     private final GetAllCustomersUseCase getAllCustomersUseCase;
     private final GetCustomerByCpfUseCase getCustomerByCpfUseCase;
     private final CreateCustomerUseCase createCustomerUseCase;
     private final UpdateCustomerUseCase updateCustomerUseCase;
+    private final LoginCustomerUseCase loginCustomerUseCase;
 
     public CustomerController(
             GetAllCustomersUseCase getAllCustomersUseCase,
             GetCustomerByCpfUseCase getCustomerByCpfUseCase,
             CreateCustomerUseCase createCustomerUseCase,
-            UpdateCustomerUseCase updateCustomerUseCase) {
+            UpdateCustomerUseCase updateCustomerUseCase,
+            LoginCustomerUseCase loginCustomerUseCase) {
         this.getAllCustomersUseCase = getAllCustomersUseCase;
         this.getCustomerByCpfUseCase = getCustomerByCpfUseCase;
         this.createCustomerUseCase = createCustomerUseCase;
         this.updateCustomerUseCase = updateCustomerUseCase;
+        this.loginCustomerUseCase = loginCustomerUseCase;
     }
 
     @Operation(description = "Retorna a lista de clientes")
@@ -46,7 +51,6 @@ public class CustomerController {
             @ApiResponse(responseCode = "200", description = "Retorna lista de clientes"),
             @ApiResponse(responseCode = "400", description = "Não existe clientes")
     })
-    @CrossOrigin(origins = "*", allowedHeaders = "*")
     @GetMapping
     public List<CustomerResponseDTO> getAll() {
         List<Customer> customers = getAllCustomersUseCase.execute();
@@ -74,15 +78,15 @@ public class CustomerController {
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CustomerResponseDTO saveCustomer(@RequestBody CustomerRequestDTO data) {
+    public CustomerResponseDTO saveCustomer(@Valid @RequestBody CustomerRequestDTO data) {
         try {
-//            Customer newCustomer = new Customer(data.name(), data.email(), data.cpf());
             Customer newCustomer = new Customer();
             newCustomer.setName(data.name());
             newCustomer.setEmail(data.email());
             newCustomer.setCpf(data.cpf());
+            newCustomer.setSenha(data.senha());
 
-            Customer createdCustomer = createCustomerUseCase.execute(newCustomer); // Chamada ao novo serviço
+            Customer createdCustomer = createCustomerUseCase.execute(newCustomer);
             return CustomerResponseDTO.fromDomain(createdCustomer);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
@@ -101,13 +105,33 @@ public class CustomerController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer ID is mandatory for update.");
         }
         try {
-            Customer customerToUpdate = new Customer(data.id(), data.name(), data.email(), data.cpf());
-            Customer updatedCustomer = updateCustomerUseCase.execute(customerToUpdate); // Chamada ao novo serviço
+            Customer customerToUpdate = new Customer();
+            customerToUpdate.setId(data.id());
+            customerToUpdate.setName(data.name());
+            customerToUpdate.setEmail(data.email());
+            customerToUpdate.setCpf(data.cpf());
+
+            Customer updatedCustomer = updateCustomerUseCase.execute(customerToUpdate);
             return ResponseEntity.ok(CustomerResponseDTO.fromDomain(updatedCustomer));
         } catch (CustomerNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @Operation(description = "Realiza o login do cliente")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Login efetuado com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Credenciais inválidas")
+    })
+    @PostMapping("/login")
+    public ResponseEntity<CustomerResponseDTO> login(@Valid @RequestBody LoginRequestDTO data) {
+        try {
+            Customer customer = loginCustomerUseCase.execute(data.cpf(), data.senha());
+            return ResponseEntity.ok(CustomerResponseDTO.fromDomain(customer));
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
         }
     }
 }

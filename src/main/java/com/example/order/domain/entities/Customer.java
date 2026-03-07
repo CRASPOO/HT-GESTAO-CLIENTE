@@ -82,4 +82,7 @@ public class Customer {
     @Range(min = 10000000000L, max = 99999999999L, message = "CPF deve ter 11 dígitos")
     private String cpf;
 
+    @NotBlank(message = "Senha em branco")
+    private String senha;
+
 }
