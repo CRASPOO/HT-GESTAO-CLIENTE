@@ -49,7 +49,7 @@ Executando a Aplicação
 Bash
 mvn spring-boot:run
 
-##🧪 Testes e Qualidade
+##🧪 Testes e Qualidade =)
 O projeto conta com testes unitários para validar regras de domínio, use cases e adaptadores.
 Rodar Testes
 Bash
