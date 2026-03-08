@@ -18,21 +18,28 @@ public class CustomerJpaEntity {
 
     private String cpf;
 
+    @Column(nullable = false)
+    private String senha; // <-- NOVA COLUNA NO BANCO
+
     public CustomerJpaEntity() {}
 
-    public CustomerJpaEntity(Long id, String name, String email, String cpf) {
+    // Construtor atualizado com a senha
+    public CustomerJpaEntity(Long id, String name, String email, String cpf, String senha) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.cpf = cpf;
+        this.senha = senha;
     }
 
     public Customer toDomain() {
-        return new Customer(this.id, this.name, this.email, this.cpf);
+        // Atualizado para passar a senha na criação do Domínio
+        return new Customer(this.id, this.name, this.email, this.cpf, this.senha);
     }
 
     public static CustomerJpaEntity fromDomain(Customer domain) {
-        return new CustomerJpaEntity(domain.getId(), domain.getName(), domain.getEmail(), domain.getCpf());
+        // Atualizado para pegar a senha do Domínio e colocar na entidade do banco
+        return new CustomerJpaEntity(domain.getId(), domain.getName(), domain.getEmail(), domain.getCpf(), domain.getSenha());
     }
 
     // Getters e setters
@@ -44,4 +51,6 @@ public class CustomerJpaEntity {
     public void setEmail(String email) { this.email = email; }
     public String getCpf() { return cpf; }
     public void setCpf(String cpf) { this.cpf = cpf; }
+    public String getSenha() { return senha; } // <-- NOVO GETTER
+    public void setSenha(String senha) { this.senha = senha; } // <-- NOVO SETTER
 }
