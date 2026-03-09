@@ -34,8 +34,16 @@ class CustomerServiceTest {
         // Arrange
         Customer c1 = new Customer();
         c1.setName("Ana");
+        c1.setEmail("ana@teste.com"); // <-- Adicionado para entidade completa
+        c1.setCpf("11111111111"); // <-- Adicionado
+        c1.setSenha("senha123"); // <-- Adicionada a senha
+
         Customer c2 = new Customer();
         c2.setName("Bruno");
+        c2.setEmail("bruno@teste.com"); // <-- Adicionado para entidade completa
+        c2.setCpf("22222222222"); // <-- Adicionado
+        c2.setSenha("senha123"); // <-- Adicionada a senha
+
         List<Customer> listaMock = Arrays.asList(c1, c2);
 
         when(customerRepositoryPort.findAll()).thenReturn(listaMock);
@@ -77,6 +85,8 @@ class CustomerServiceTest {
         Customer customerMock = new Customer();
         customerMock.setCpf(cpf);
         customerMock.setName("Carlos");
+        customerMock.setEmail("carlos@teste.com"); // <-- Adicionado
+        customerMock.setSenha("senha123"); // <-- Adicionada a senha
 
         when(customerRepositoryPort.findByCpf(cpf)).thenReturn(Optional.of(customerMock));
 

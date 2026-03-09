@@ -4,6 +4,7 @@ import com.example.order.application.ports.in.Customer.CreateCustomerUseCase;
 import com.example.order.application.ports.in.Customer.GetAllCustomersUseCase;
 import com.example.order.application.ports.in.Customer.GetCustomerByCpfUseCase;
 import com.example.order.application.ports.in.Customer.UpdateCustomerUseCase;
+import com.example.order.application.ports.in.Customer.LoginCustomerUseCase;
 import com.example.order.domain.entities.Customer;
 import com.example.order.infrastructure.adapters.in.web.Dtos.CustomerRequestDTO;
 import com.example.order.shared.exceptions.CustomerNotFoundException;
@@ -11,8 +12,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc; // <-- NOVA IMPORTAÇÃO
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean; // <--- NOVA IMPORTAÇÃO
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -27,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CustomerController.class)
+@AutoConfigureMockMvc(addFilters = false) // <-- CORREÇÃO: Desliga os filtros do Spring Security durante o teste
 class CustomerControllerTest {
 
     @Autowired
@@ -34,8 +37,6 @@ class CustomerControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    // --- AQUI ESTÁ A MUDANÇA: Use @MockitoBean em vez de @MockBean ---
 
     @MockitoBean
     private GetAllCustomersUseCase getAllCustomersUseCase;
@@ -49,13 +50,14 @@ class CustomerControllerTest {
     @MockitoBean
     private UpdateCustomerUseCase updateCustomerUseCase;
 
-    // --- O RESTANTE DO CÓDIGO PERMANECE IGUAL ---
+    @MockitoBean
+    private LoginCustomerUseCase loginCustomerUseCase;
 
     @Test
     @DisplayName("GET /customer - Deve retornar lista de clientes (200 OK)")
     void deveRetornarListaDeClientes() throws Exception {
-        Customer c1 = new Customer(1L, "Maria", "maria@test.com", "11122233344");
-        Customer c2 = new Customer(2L, "Joao", "joao@test.com", "55566677788");
+        Customer c1 = new Customer(1L, "Maria", "maria@test.com", "11122233344", "senha123");
+        Customer c2 = new Customer(2L, "Joao", "joao@test.com", "55566677788", "senha123");
         List<Customer> customers = Arrays.asList(c1, c2);
 
         when(getAllCustomersUseCase.execute()).thenReturn(customers);
@@ -71,7 +73,7 @@ class CustomerControllerTest {
     @DisplayName("GET /customer/cpf/{cpf} - Deve retornar cliente quando existir (200 OK)")
     void deveRetornarClientePorCpf() throws Exception {
         String cpf = "12345678900";
-        Customer customer = new Customer(1L, "Carlos", "carlos@test.com", cpf);
+        Customer customer = new Customer(1L, "Carlos", "carlos@test.com", cpf, "senha123");
 
         when(getCustomerByCpfUseCase.execute(cpf)).thenReturn(Optional.of(customer));
 
@@ -94,8 +96,8 @@ class CustomerControllerTest {
     @Test
     @DisplayName("POST /customer - Deve criar cliente com sucesso (201 Created)")
     void deveCriarCliente() throws Exception {
-        CustomerRequestDTO requestDTO = new CustomerRequestDTO(null, "Ana", "ana@test.com", "12345678900");
-        Customer createdCustomer = new Customer(10L, "Ana", "ana@test.com", "12345678900");
+        CustomerRequestDTO requestDTO = new CustomerRequestDTO(null, "Ana", "ana@test.com", "12345678900", "senha123");
+        Customer createdCustomer = new Customer(10L, "Ana", "ana@test.com", "12345678900", "senha123");
 
         when(createCustomerUseCase.execute(any(Customer.class))).thenReturn(createdCustomer);
 
@@ -110,7 +112,7 @@ class CustomerControllerTest {
     @Test
     @DisplayName("POST /customer - Deve retornar 409 Conflict se cliente já existe")
     void deveRetornarConflitoSeClienteJaExiste() throws Exception {
-        CustomerRequestDTO requestDTO = new CustomerRequestDTO(null, "Duplicado", "dup@test.com", "11111111111");
+        CustomerRequestDTO requestDTO = new CustomerRequestDTO(null, "Duplicado", "dup@test.com", "11111111111", "senha123");
 
         when(createCustomerUseCase.execute(any(Customer.class)))
                 .thenThrow(new IllegalArgumentException("Customer with this CPF already exists."));
@@ -124,8 +126,8 @@ class CustomerControllerTest {
     @Test
     @DisplayName("PUT /customer - Deve atualizar cliente com sucesso (200 OK)")
     void deveAtualizarCliente() throws Exception {
-        CustomerRequestDTO requestDTO = new CustomerRequestDTO(1L, "Nome Novo", "novo@test.com", "12345678900");
-        Customer updatedCustomer = new Customer(1L, "Nome Novo", "novo@test.com", "12345678900");
+        CustomerRequestDTO requestDTO = new CustomerRequestDTO(1L, "Nome Novo", "novo@test.com", "12345678900", "senha123");
+        Customer updatedCustomer = new Customer(1L, "Nome Novo", "novo@test.com", "12345678900", "senha123");
 
         when(updateCustomerUseCase.execute(any(Customer.class))).thenReturn(updatedCustomer);
 
@@ -139,7 +141,7 @@ class CustomerControllerTest {
     @Test
     @DisplayName("PUT /customer - Deve retornar 400 Bad Request se ID for nulo")
     void deveRetornarBadRequestSeIdNulo() throws Exception {
-        CustomerRequestDTO requestDTO = new CustomerRequestDTO(null, "Sem ID", "email@test.com", "123");
+        CustomerRequestDTO requestDTO = new CustomerRequestDTO(null, "Sem ID", "email@test.com", "123", "senha123");
 
         mockMvc.perform(put("/customer")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -150,7 +152,7 @@ class CustomerControllerTest {
     @Test
     @DisplayName("PUT /customer - Deve retornar 404 Not Found se cliente não existir para atualização")
     void deveRetornarNotFoundAoAtualizarInexistente() throws Exception {
-        CustomerRequestDTO requestDTO = new CustomerRequestDTO(99L, "Inexistente", "email@test.com", "123");
+        CustomerRequestDTO requestDTO = new CustomerRequestDTO(99L, "Inexistente", "email@test.com", "123", "senha123");
 
         when(updateCustomerUseCase.execute(any(Customer.class)))
                 .thenThrow(new CustomerNotFoundException("Customer not found"));

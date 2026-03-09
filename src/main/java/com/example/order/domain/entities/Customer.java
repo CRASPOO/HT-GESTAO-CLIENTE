@@ -1,10 +1,25 @@
 package com.example.order.domain.entities;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class Customer {
+
     private Long id;
+
+    @NotBlank(message = "O nome não pode ser nulo ou vazio")
     private String name;
+
+    @NotBlank(message = "O email não pode ser nulo ou vazio")
+    @Email(message = "O formato do email deve ser válido")
     private String email;
+
+    @NotBlank(message = "O CPF não pode ser nulo ou vazio")
+    @Size(min = 11, max = 11, message = "O CPF deve ter exatamente 11 caracteres")
     private String cpf;
+
+    @NotBlank(message = "A senha não pode ser nula ou vazia")
     private String senha;
 
     // Construtor vazio (necessário para instanciar no Controller)

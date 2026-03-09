@@ -35,11 +35,16 @@ class UpdateCustomerServiceTest {
         customerToUpdate.setId(id);
         customerToUpdate.setName("Nome Atualizado");
         customerToUpdate.setEmail("novo@email.com");
+        customerToUpdate.setCpf("12345678900");
+        customerToUpdate.setSenha("senhaNova123"); // <-- Adicionada a senha
 
         // Cliente antigo que já está no banco (apenas para simular que o ID existe)
         Customer customerNoBanco = new Customer();
         customerNoBanco.setId(id);
         customerNoBanco.setName("Nome Antigo");
+        customerNoBanco.setEmail("antigo@email.com");
+        customerNoBanco.setCpf("12345678900");
+        customerNoBanco.setSenha("senhaAntiga123"); // <-- Adicionada a senha
 
         // 1. O serviço busca pelo ID para ver se existe
         when(customerRepositoryPort.findById(id)).thenReturn(Optional.of(customerNoBanco));
@@ -68,6 +73,9 @@ class UpdateCustomerServiceTest {
         Customer customerToUpdate = new Customer();
         customerToUpdate.setId(idInexistente);
         customerToUpdate.setName("Tentativa Falha");
+        customerToUpdate.setEmail("falha@email.com");
+        customerToUpdate.setCpf("12345678900");
+        customerToUpdate.setSenha("senha123"); // <-- Adicionada a senha
 
         // Simula que NÃO encontrou o ID no banco
         when(customerRepositoryPort.findById(idInexistente)).thenReturn(Optional.empty());

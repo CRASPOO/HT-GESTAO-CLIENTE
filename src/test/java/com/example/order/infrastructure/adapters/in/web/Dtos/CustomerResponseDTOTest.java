@@ -19,7 +19,7 @@ class CustomerResponseDTOTest {
     // --- Teste de Unidade (Lógica de Mapeamento) ---
 
     @Test
-    @DisplayName("Deve converter Entidade Customer para DTO corretamente")
+    @DisplayName("Deve converter Entidade Customer para DTO corretamente sem expor a senha")
     void deveConverterDeDominio() {
         // Arrange
         Customer customer = new Customer();
@@ -27,6 +27,7 @@ class CustomerResponseDTOTest {
         customer.setName("Teste de Mapeamento");
         customer.setEmail("map@teste.com");
         customer.setCpf("12345678900");
+        customer.setSenha("senha123"); // <-- A entidade tem a senha populada
 
         // Act
         CustomerResponseDTO dto = CustomerResponseDTO.fromDomain(customer);
@@ -37,6 +38,9 @@ class CustomerResponseDTOTest {
         assertThat(dto.getName()).isEqualTo(customer.getName());
         assertThat(dto.getEmail()).isEqualTo(customer.getEmail());
         assertThat(dto.getCpf()).isEqualTo(customer.getCpf());
+
+        // NOTA DE SEGURANÇA: Não testamos/mapeamos a senha para o DTO de Response,
+        // pois a senha nunca deve ser devolvida no payload da API!
     }
 
     // --- Teste de Serialização (JSON) ---
@@ -61,6 +65,9 @@ class CustomerResponseDTOTest {
         assertThat(result).extractingJsonPathStringValue("$.name").isEqualTo("Maria");
         assertThat(result).extractingJsonPathStringValue("$.email").isEqualTo("maria@teste.com");
         assertThat(result).extractingJsonPathStringValue("$.cpf").isEqualTo("98765432100");
+
+        // Garante que o JSON gerado NÃO possui o campo de senha vazando
+        assertThat(result).doesNotHaveJsonPath("$.senha");
     }
 
     @Test
