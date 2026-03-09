@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -21,6 +22,9 @@ class CreateCustomerServiceTest {
     @Mock
     private CustomerRepositoryPort customerRepositoryPort;
 
+    @Mock
+    private PasswordEncoder passwordEncoder; // <-- Adicionado o mock do encoder
+
     @InjectMocks
     private CreateCustomerService createCustomerService;
 
@@ -33,9 +37,13 @@ class CreateCustomerServiceTest {
         customerInput.setCpf(cpf);
         customerInput.setName("Maria");
         customerInput.setEmail("maria@teste.com");
+        customerInput.setSenha("senha123"); // <-- Adicionado a senha pura no input
 
         // Simula que NÃO encontrou ninguém com esse CPF (Optional.empty)
         when(customerRepositoryPort.findByCpf(cpf)).thenReturn(Optional.empty());
+
+        // Simula o comportamento do PasswordEncoder
+        when(passwordEncoder.encode("senha123")).thenReturn("senhaCriptografadaHash");
 
         // Simula o salvamento retornando o próprio objeto (ou um com ID preenchido)
         when(customerRepositoryPort.save(any(Customer.class))).thenReturn(customerInput);
@@ -52,6 +60,8 @@ class CreateCustomerServiceTest {
         verify(customerRepositoryPort, times(1)).save(customerInput);
         // Verifica se o método findByCpf foi chamado
         verify(customerRepositoryPort, times(1)).findByCpf(cpf);
+        // Verifica se o encoder foi chamado para proteger a senha
+        verify(passwordEncoder, times(1)).encode("senha123");
     }
 
     @Test
@@ -61,10 +71,12 @@ class CreateCustomerServiceTest {
         String cpf = "99988877700";
         Customer customerInput = new Customer();
         customerInput.setCpf(cpf);
+        customerInput.setSenha("senha123"); // <-- Adicionado
 
         Customer clienteExistente = new Customer();
         clienteExistente.setCpf(cpf);
         clienteExistente.setName("João Já Existe");
+        clienteExistente.setSenha("hashAntigo"); // <-- Adicionado
 
         // Simula que JÁ encontrou um cliente (Optional.of)
         when(customerRepositoryPort.findByCpf(cpf)).thenReturn(Optional.of(clienteExistente));
@@ -80,5 +92,7 @@ class CreateCustomerServiceTest {
         // --- VERIFICAÇÕES IMPORTANTES ---
         // Garante que o método save NUNCA foi chamado (proteção da regra de negócio)
         verify(customerRepositoryPort, never()).save(any());
+        // Garante que a senha nem chegou a ser criptografada se o CPF já existia
+        verify(passwordEncoder, never()).encode(any());
     }
 }

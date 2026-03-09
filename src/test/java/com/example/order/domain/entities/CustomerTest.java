@@ -1,4 +1,3 @@
-// java
 package com.example.order.domain.entities;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -28,6 +27,7 @@ class CustomerTest {
         customer.setName("Maria Silva");
         customer.setEmail("maria.silva@example.com");
         customer.setCpf("12345678900");
+        customer.setSenha("senha123"); // <-- Adicionado para garantir um cliente 100% válido
 
         Set<ConstraintViolation<Customer>> violations = validator.validate(customer);
         assertTrue(violations.isEmpty(), "Não deve haver violações para cliente válido");
@@ -39,6 +39,7 @@ class CustomerTest {
         customer.setName("  ");
         customer.setEmail("maria.silva@example.com");
         customer.setCpf("12345678900");
+        customer.setSenha("senha123"); // <-- Adicionado
 
         Set<ConstraintViolation<Customer>> violations = validator.validate(customer);
         assertFalse(violations.isEmpty(), "Deve haver violações quando o nome estiver em branco");
@@ -51,6 +52,7 @@ class CustomerTest {
         customer.setName("Maria Silva");
         customer.setEmail("email-invalido");
         customer.setCpf("12345678900");
+        customer.setSenha("senha123"); // <-- Adicionado
 
         Set<ConstraintViolation<Customer>> violations = validator.validate(customer);
         assertFalse(violations.isEmpty(), "Deve haver violações para email inválido");
@@ -63,9 +65,23 @@ class CustomerTest {
         customer.setName("Maria Silva");
         customer.setEmail("maria.silva@example.com");
         customer.setCpf("12345"); // cpf inválido
+        customer.setSenha("senha123"); // <-- Adicionado
 
         Set<ConstraintViolation<Customer>> violations = validator.validate(customer);
         assertFalse(violations.isEmpty(), "Deve haver violações para CPF com tamanho incorreto");
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("cpf")));
+    }
+
+    @Test
+    void deveDetectarSenhaEmBranco() {
+        Customer customer = new Customer();
+        customer.setName("Maria Silva");
+        customer.setEmail("maria.silva@example.com");
+        customer.setCpf("12345678900");
+        customer.setSenha("   "); // <-- Testando senha em branco/inválida
+
+        Set<ConstraintViolation<Customer>> violations = validator.validate(customer);
+        assertFalse(violations.isEmpty(), "Deve haver violações quando a senha estiver em branco");
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("senha")));
     }
 }

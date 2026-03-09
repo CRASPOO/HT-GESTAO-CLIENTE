@@ -28,6 +28,7 @@ public class CreateCustomerSteps {
         input.setName(nome);
         input.setEmail(email);
         input.setCpf("39475318852");
+        input.setSenha("senha123"); // <-- Adicionado a senha para validação completa
 
         // --- PREPARAÇÃO DO OUTPUT (O que o Mock vai retornar) ---
         outputEsperado = new Customer();
@@ -35,6 +36,7 @@ public class CreateCustomerSteps {
         outputEsperado.setName(nome);
         outputEsperado.setEmail(email);
         outputEsperado.setCpf("39475318852");
+        outputEsperado.setSenha("senha123"); // <-- Adicionado a senha no retorno mockado
 
         // 2. IMPORTANTE: Configure o comportamento do Mock aqui no @Dado (Pré-condição)
         // Você diz: "Quando o caso de uso for chamado com 'input', retorne 'outputEsperado'"

@@ -23,7 +23,8 @@ class CustomerRequestDTOTest {
                 1L,
                 "Maria",
                 "maria@teste.com",
-                "12345678900"
+                "12345678900",
+                "senha123"
         );
 
         // Act
@@ -35,6 +36,7 @@ class CustomerRequestDTOTest {
         assertThat(result).extractingJsonPathStringValue("$.name").isEqualTo("Maria");
         assertThat(result).extractingJsonPathStringValue("$.email").isEqualTo("maria@teste.com");
         assertThat(result).extractingJsonPathStringValue("$.cpf").isEqualTo("12345678900");
+        assertThat(result).extractingJsonPathStringValue("$.senha").isEqualTo("senha123"); // <-- Asserção adicionada
     }
 
     @Test
@@ -46,9 +48,10 @@ class CustomerRequestDTOTest {
                     "id": 2,
                     "name": "João",
                     "email": "joao@teste.com",
-                    "cpf": "98765432100"
+                    "cpf": "98765432100",
+                    "senha": "minhasenhaforte"
                 }
-                """;
+                """; // <-- Senha adicionada no payload JSON
 
         // Act
         CustomerRequestDTO dto = json.parseObject(jsonContent);
@@ -58,5 +61,6 @@ class CustomerRequestDTOTest {
         assertThat(dto.name()).isEqualTo("João");
         assertThat(dto.email()).isEqualTo("joao@teste.com");
         assertThat(dto.cpf()).isEqualTo("98765432100");
+        assertThat(dto.senha()).isEqualTo("minhasenhaforte"); // <-- Asserção adicionada
     }
 }

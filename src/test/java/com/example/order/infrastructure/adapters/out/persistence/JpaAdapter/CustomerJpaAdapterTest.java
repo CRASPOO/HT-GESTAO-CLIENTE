@@ -30,9 +30,9 @@ class CustomerJpaAdapterTest {
     @Test
     @DisplayName("Deve retornar lista de Customers (Domínio) ao buscar todos")
     void deveRetornarTodos() {
-        // Arrange
-        CustomerJpaEntity entity1 = new CustomerJpaEntity(1L, "Maria", "maria@test.com", "111");
-        CustomerJpaEntity entity2 = new CustomerJpaEntity(2L, "Joao", "joao@test.com", "222");
+        // Arrange - Adicionada a senha nos construtores
+        CustomerJpaEntity entity1 = new CustomerJpaEntity(1L, "Maria", "maria@test.com", "111", "senha123");
+        CustomerJpaEntity entity2 = new CustomerJpaEntity(2L, "Joao", "joao@test.com", "222", "senha123");
 
         when(springDataRepository.findAll()).thenReturn(Arrays.asList(entity1, entity2));
 
@@ -51,9 +51,9 @@ class CustomerJpaAdapterTest {
     @Test
     @DisplayName("Deve retornar Customer (Domínio) quando encontrar por CPF")
     void deveRetornarPorCpfQuandoEncontrado() {
-        // Arrange
+        // Arrange - Adicionada a senha no construtor
         String cpf = "12345678900";
-        CustomerJpaEntity entity = new CustomerJpaEntity(1L, "Carlos", "carlos@test.com", cpf);
+        CustomerJpaEntity entity = new CustomerJpaEntity(1L, "Carlos", "carlos@test.com", cpf, "senha123");
 
         when(springDataRepository.findByCpf(cpf)).thenReturn(Optional.of(entity));
 
@@ -83,9 +83,9 @@ class CustomerJpaAdapterTest {
     @Test
     @DisplayName("Deve retornar Customer (Domínio) quando encontrar por ID")
     void deveRetornarPorIdQuandoEncontrado() {
-        // Arrange
+        // Arrange - Adicionada a senha no construtor
         Long id = 10L;
-        CustomerJpaEntity entity = new CustomerJpaEntity(id, "Ana", "ana@test.com", "111");
+        CustomerJpaEntity entity = new CustomerJpaEntity(id, "Ana", "ana@test.com", "111", "senha123");
 
         when(springDataRepository.findById(id)).thenReturn(Optional.of(entity));
 
@@ -106,9 +106,10 @@ class CustomerJpaAdapterTest {
         customerDomain.setName("Novo Cliente");
         customerDomain.setEmail("novo@test.com");
         customerDomain.setCpf("12345678900");
+        customerDomain.setSenha("senha123"); // <-- Adicionada a senha
 
-        // Objeto simulado que o banco devolveria (com ID gerado)
-        CustomerJpaEntity savedEntity = new CustomerJpaEntity(50L, "Novo Cliente", "novo@test.com", "12345678900");
+        // Objeto simulado que o banco devolveria (com ID gerado e a senha)
+        CustomerJpaEntity savedEntity = new CustomerJpaEntity(50L, "Novo Cliente", "novo@test.com", "12345678900", "senha123");
 
         when(springDataRepository.save(any(CustomerJpaEntity.class))).thenReturn(savedEntity);
 
