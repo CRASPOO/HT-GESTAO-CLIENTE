@@ -80,7 +80,7 @@
 			<version>1.10.2</version> <scope>test</scope>
 		</dependency>
 
-		<!-- Cucumber + JUnit Platform + integração com Spring -->
+		<!-- Cucumber + JUnit Platform + integração com Spring 2-->
 		<dependency>
 			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-java</artifactId>
