@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: minha-app-pod-monitor
+  namespace: monitoring
+  labels:
+    release: monitoramento
+spec:
+  selector:
+    matchLabels:
+      app: minha-app-clientes
+  podMetricsEndpoints:
+    - targetPort: 8080
+      path: /actuator/prometheus
+      interval: 15s
