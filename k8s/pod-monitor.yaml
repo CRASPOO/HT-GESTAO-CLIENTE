@@ -6,6 +6,9 @@ metadata:
   labels:
     release: monitoramento
 spec:
+  # Esta linha permite encontrar a app mesmo que esteja em namespaces diferentes (ex: default)
+  namespaceSelector:
+    any: true
   selector:
     matchLabels:
       app: minha-app-clientes
