@@ -6,7 +6,7 @@ metadata:
   labels:
     release: monitoramento
 spec:
-  # Esta linha permite encontrar a app mesmo que esteja em namespaces diferentes (ex: default)
+  # Esta linha permite encontrakubectl apply -f k8s/pod-monitor-videos.yamlr a app mesmo que esteja em namespaces diferentes (ex: default)
   namespaceSelector:
     any: true
   selector:
