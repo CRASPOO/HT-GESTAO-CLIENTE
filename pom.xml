@@ -12,9 +12,9 @@
 	</parent>
 
 	<groupId>com.example</groupId>
-	<artifactId>GESTAO-CLIENTE</artifactId>
+	<artifactId>cliente</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>GESTAO-CLIENTE</name>
+	<name>cliente</name>
 	<description>Processamento de Imagens</description>
 
 	<properties>
